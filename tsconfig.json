@@ -1,0 +1,7 @@
+{
+  "extends": "@fenralab/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+  },
+  "include": ["src", "tests/index.spec.ts"]
+}
