@@ -4,14 +4,23 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": {
+        "import": "./src/index.ts"
+      },
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
     "dev": "tsx watch src/index.ts",
-    "test": "jest",
-    "clean": "rimraf dist"
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "clean": "rimraf dist",
+    "test": "jest"
   },
   "devDependencies": {
     "@fenralab/tsconfig-base": "file:../tsconfig-base",
@@ -24,12 +33,13 @@
     "tsup": "^8.5.0",
     "tsx": "^4.20.6",
     "typedoc": "^0.28.14",
-    "typescript": "^5.6.0"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@fenralab/core": "file:../core",
     "@fenralab/router": "file:../router",
     "@fenralab/url": "file:../url",
+    "@swc/core": "^1.15.1",
     "xmlbuilder2": "^4.0.0"
   },
   "license": "MIT",
