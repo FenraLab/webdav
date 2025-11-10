@@ -35,7 +35,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fenralab/router.git"
+    "url": "https://github.com/fenralab/webdav.git"
   },
   "description": "Router utilities for @fenralab packages",
   "publishConfig": {
