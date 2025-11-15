@@ -16,7 +16,7 @@ export class Property {
 export class PropertyManager <
     TRequest extends Request = Request,
     TResponse extends Response = Response,
-    TResource extends WebDAVResourceBase = WebDAVResourceBase
+    TResource extends WebDAVResourceBase<TRequest, TResponse> = WebDAVResourceBase<TRequest, TResponse>
 > {
     constructor(public resource: TResource) {
 

@@ -11,7 +11,7 @@ export abstract class WebDAVResourceBase<
     TError = any
 > extends Router<TRequest, TResponse, TError> {
 
-    propertyManager: PropertyManager<TRequest, TResponse, this>;
+    propertyManager: PropertyManager<TRequest, TResponse, WebDAVResourceBase<TRequest, TResponse, TError>>;
 
     constructor(path?: VirtualURI | string) {
         super(path);
