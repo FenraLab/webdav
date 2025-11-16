@@ -1,2 +1,1 @@
-
-test('coverage', () => expect(true).toBeTruthy())
+test("coverage", () => expect(true).toBeTruthy());

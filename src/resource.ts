@@ -1,3 +1,4 @@
+import * as URI from "@fenralab/url";
 import { Request, Response, VirtualURI } from "@fenralab/router";
 
 import { WebDAVResourceBase } from "./baseResource";
@@ -8,22 +9,13 @@ export class WebDAVResource<
   TResponse extends Response = Response,
   TError = any,
 > extends WebDAVResourceBase<TRequest, TResponse, TError> {
-  async getDisplayName(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<string> {
+  async getDisplayName(request: TRequest): Promise<string> {
+    return URI.toString(this.fullURI, request.params);
+  }
+  async getContentLength(request: TRequest): Promise<number> {
     throw new Error("Method not implemented.");
   }
-  async getContentLength(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<number> {
-    throw new Error("Method not implemented.");
-  }
-  async getResourceType(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<string | XMLBuilder> {
+  async getResourceType(request: TRequest): Promise<string | XMLBuilder> {
     throw new Error("Method not implemented.");
   }
 

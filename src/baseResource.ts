@@ -9,19 +9,21 @@ import {
   VirtualURI,
 } from "@fenralab/router";
 
-import { PropertyManager, WebDAVResourcePropertyManagerVisitor, WebDAVResourcePropertySupport } from "./properties";
+import {
+  PropertyManager,
+  WebDAVResourcePropertyManagerVisitor,
+  WebDAVResourcePropertySupport,
+} from "./properties";
 import { create } from "xmlbuilder2";
 
 export abstract class WebDAVResourceBase<
-  TRequest extends Request = Request,
-  TResponse extends Response = Response,
-  TError = any,
-> 
-extends Router<TRequest, TResponse, TError> 
-implements WebDAVResourcePropertySupport<TRequest, TResponse, TError>
+    TRequest extends Request = Request,
+    TResponse extends Response = Response,
+    TError = any,
+  >
+  extends Router<TRequest, TResponse, TError>
+  implements WebDAVResourcePropertySupport<TRequest, TResponse, TError>
 {
-
-
   propertyManager: PropertyManager<
     TRequest,
     TResponse,
@@ -121,32 +123,46 @@ implements WebDAVResourcePropertySupport<TRequest, TResponse, TError>
   ) {
     response.statusCode = 207; // Multi-Status
 
-    const depth = (request.headers['depth'] ?? '0') as '0' | '1' | 'infinity'
+    const depth = (request.headers["depth"] ?? "0") as "0" | "1" | "infinity";
 
-    const traversalAgent = new WebDAVResourcePropertyManagerVisitor<TRequest, TResponse, this>(depth, request);
-    await traversalAgent.traverse(this)
+    const traversalAgent = new WebDAVResourcePropertyManagerVisitor<
+      TRequest,
+      TResponse,
+      this
+    >(depth, request);
+    await traversalAgent.traverse(this);
 
     // if (request.xml){
     //     console.log(request.xml.toObject())
     // }
 
     await next();
-    const xml = create({ version: '1.0', encoding: 'utf-8' })
+    const xml = create({ version: "1.0", encoding: "utf-8" });
 
     //
     //
     //
     //      In the middle of implementing the propfind response for all response objects returned from traversal
     ///
-    //
 
-    const multistatus = xml.ele('D:multistatus', { 'xmlns:D': 'DAV:' })
+    const multistatus = xml.ele("D:multistatus", { "xmlns:D": "DAV:" });
     // await this.appendResponse(multistatus, request, response)
-    for (const response of traversalAgent.responses ?? []){
-      const responseXML = multistatus.ele("D:response")
-      responseXML.ele('D:href')
+    for (const response of traversalAgent.responses ?? []) {
+      const responseXML = multistatus.ele("D:response");
+      responseXML.ele("D:href").txt(response.href);
+
+      for (const propstat of response.propstat) {
+        const propstatXML = responseXML.ele("D:propstat");
+        propstatXML.ele("D:status").txt(propstat.status);
+        const propXML = responseXML.ele("D:prop");
+
+        for (const property of propstat.properties) {
+          console.log(property);
+          propXML.import(property.value);
+        }
+      }
     }
-    response.write(xml.toString({prettyPrint: true}))
+    response.write(xml.toString({ prettyPrint: true }));
   }
 
   @declareHandler("proppatch")
@@ -162,20 +178,11 @@ implements WebDAVResourcePropertySupport<TRequest, TResponse, TError>
   // ------ Properties ----------------------------------------------
   //
 
-  abstract getDisplayName(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<string>;
+  abstract getDisplayName(request: TRequest): Promise<string>;
 
-  abstract getContentLength(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<number>;
+  abstract getContentLength(request: TRequest): Promise<number>;
 
-  abstract getResourceType(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<string | XMLBuilder>;
+  abstract getResourceType(request: TRequest): Promise<string | XMLBuilder>;
 
   //
   // ------ Details ----------------------------------------------

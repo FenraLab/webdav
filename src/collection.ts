@@ -1,8 +1,10 @@
 import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 import { fragment } from "xmlbuilder2";
 
-import { WebDAVResourceBase } from "./baseResource";
 import { Request, Response } from "@fenralab/router";
+import * as URI from "@fenralab/url";
+
+import { WebDAVResourceBase } from "./baseResource";
 
 export class WebDAVCollection<
   TRequest extends Request = Request,
@@ -14,20 +16,15 @@ export class WebDAVCollection<
     // this.maybeImplements('mkcol');
   }
 
-  async getDisplayName(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<string> {
-    throw new Error("Method not implemented.");
+  async getDisplayName(request: TRequest): Promise<string> {
+    return URI.toString(this.fullURI, request.params);
   }
-  async getContentLength(
-    request: TRequest,
-    response: TResponse,
-  ): Promise<number> {
+
+  async getContentLength(request: TRequest): Promise<number> {
     throw new Error("Method not implemented.");
   }
 
-  async getResourceType(): Promise<string | XMLBuilder> {
+  async getResourceType(): Promise<XMLBuilder> {
     return fragment().ele("D:collection");
   }
 }
