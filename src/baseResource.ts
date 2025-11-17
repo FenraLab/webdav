@@ -101,6 +101,13 @@ export abstract class WebDAVResourceBase<
     response: TResponse,
     next: Middleware.TNext,
   ) {
+    if (request.headers["content-length"]) {
+      const length = Number(request.headers["content-length"]);
+      if (length > 0) {
+        console.log(await request.body);
+      }
+    }
+
     response.statusCode = 207; // Multi-Status
 
     const depth = (request.headers["depth"] ?? "0") as "0" | "1" | "infinity";

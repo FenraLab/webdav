@@ -11,6 +11,7 @@ import {
 
 import { WebDAVResourceBase } from "./baseResource";
 import { fragment } from "xmlbuilder2";
+import { WebDAVCollection } from "./collection";
 
 export interface IPropFindProperty {
   value: XMLBuilder;
@@ -110,7 +111,7 @@ export class PropertyManager<
   async getPropFindResponses(request: TRequest): Promise<IPropFindResponse[]> {
     return [
       {
-        href: this.resource.getResolvedUI(request),
+        href: this.resource.getResolvedUI(request) + "/",
         propstat: [
           {
             properties: [
