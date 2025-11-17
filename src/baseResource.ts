@@ -16,7 +16,6 @@ import {
   WebDAVResourcePropertySupport,
 } from "./properties";
 
-
 export abstract class WebDAVResourceBase<
     TRequest extends Request = Request,
     TResponse extends Response = Response,
@@ -157,5 +156,4 @@ export abstract class WebDAVResourceBase<
   //
   // ------ Details ----------------------------------------------
   //
-
 }

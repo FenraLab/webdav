@@ -122,7 +122,10 @@ export class PropertyManager<
               {
                 value: fragment()
                   .ele("D:resourcetype")
-                  .import(await this.resource.getResourceType(request) ?? fragment()),
+                  .import(
+                    (await this.resource.getResourceType(request)) ??
+                      fragment(),
+                  ),
               },
               {
                 value: fragment()
@@ -141,5 +144,4 @@ export class PropertyManager<
       },
     ];
   }
-
 }

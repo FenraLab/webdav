@@ -10,14 +10,14 @@ import { PropertyManager } from "./properties";
 export class WebDAVResourcePropertyManager<
   TRequest extends Request = Request,
   TResponse extends Response = Response,
-  TResource extends WebDAVResource<
+  TResource extends WebDAVResource<TRequest, TResponse> = WebDAVResource<
     TRequest,
     TResponse
-  > = WebDAVResource<TRequest, TResponse>,
->
-extends PropertyManager<TRequest, TResponse, TResource>
-{
-  constructor(resource: TResource){super(resource)}
+  >,
+> extends PropertyManager<TRequest, TResponse, TResource> {
+  constructor(resource: TResource) {
+    super(resource);
+  }
 }
 
 export class WebDAVResource<
@@ -25,7 +25,6 @@ export class WebDAVResource<
   TResponse extends Response = Response,
   TError = any,
 > extends WebDAVResourceBase<TRequest, TResponse, TError> {
-
   override createPropertyManager(): typeof this.propertyManager {
     return new WebDAVResourcePropertyManager<TRequest, TResponse, this>(this);
   }
@@ -39,7 +38,7 @@ export class WebDAVResource<
   }
 
   async getResourceType(request: TRequest): Promise<undefined | XMLBuilder> {
-    return fragment()
+    return fragment();
   }
 
   constructor(path?: VirtualURI | string) {
