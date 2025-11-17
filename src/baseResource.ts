@@ -1,3 +1,4 @@
+import { create } from "xmlbuilder2";
 import { XMLBuilder } from "xmlbuilder2/lib/interfaces";
 
 import { Middleware } from "@fenralab/core";
@@ -14,7 +15,7 @@ import {
   WebDAVResourcePropertyManagerVisitor,
   WebDAVResourcePropertySupport,
 } from "./properties";
-import { create } from "xmlbuilder2";
+
 
 export abstract class WebDAVResourceBase<
     TRequest extends Request = Request,
@@ -33,7 +34,6 @@ export abstract class WebDAVResourceBase<
   constructor(path?: VirtualURI | string) {
     super(path);
 
-    // this.use(this.WebDAVXMLMiddleware.bind(this))
     this.use(this.setupWebDAVHeadersMiddleware.bind(this));
 
     this.propertyManager = this.createPropertyManager();
@@ -46,25 +46,6 @@ export abstract class WebDAVResourceBase<
   //
   // ------ Middlewares ----------------------------------------------
   //
-
-  async WebDAVXMLMiddleware(
-    request: TRequest,
-    response: TResponse,
-    next: Middleware.TNext,
-  ): Promise<void> {
-    // if (request.headers['content-type']?.includes('xml') && !request.xml){
-    //     request.xml = create(convert(await request.body, {format: "object"}))
-    // }
-    // await next()
-    // // More checks needed
-    // if (response.xml){
-    //     const xml = response.xml.end({prettyPrint: true})
-    //     response.setHeader('content-type', 'application/xml; charset="utf-8"')
-    //     response.setHeader('content-length', Buffer.byteLength(xml))
-    //     response.write(xml)
-    //     response.xml = undefined;
-    // }
-  }
 
   async setupWebDAVHeadersMiddleware(
     request: TRequest,
@@ -132,21 +113,10 @@ export abstract class WebDAVResourceBase<
     >(depth, request);
     await traversalAgent.traverse(this);
 
-    // if (request.xml){
-    //     console.log(request.xml.toObject())
-    // }
-
     await next();
     const xml = create({ version: "1.0", encoding: "utf-8" });
-
-    //
-    //
-    //
-    //      In the middle of implementing the propfind response for all response objects returned from traversal
-    ///
-
     const multistatus = xml.ele("D:multistatus", { "xmlns:D": "DAV:" });
-    // await this.appendResponse(multistatus, request, response)
+
     for (const response of traversalAgent.responses ?? []) {
       const responseXML = multistatus.ele("D:response");
       responseXML.ele("D:href").txt(response.href);
@@ -154,10 +124,10 @@ export abstract class WebDAVResourceBase<
       for (const propstat of response.propstat) {
         const propstatXML = responseXML.ele("D:propstat");
         propstatXML.ele("D:status").txt(propstat.status);
-        const propXML = responseXML.ele("D:prop");
+        const propXML = propstatXML.ele("D:prop");
 
         for (const property of propstat.properties) {
-          console.log(property);
+          // console.log(property);
           propXML.import(property.value);
         }
       }
@@ -182,71 +152,10 @@ export abstract class WebDAVResourceBase<
 
   abstract getContentLength(request: TRequest): Promise<number>;
 
-  abstract getResourceType(request: TRequest): Promise<string | XMLBuilder>;
+  abstract getResourceType(request: TRequest): Promise<undefined | XMLBuilder>;
 
   //
   // ------ Details ----------------------------------------------
   //
 
-  // async appendPropertyStatus(builder: XMLBuilder, request: TRequest, response: TResponse) {
-  //     // This is where we will determine which properties are request, which can be sent,
-  //     // and the respective statuses, grouped into propstats
-
-  //     const propstats = await this.propertyManager.getPropertiesGroupedByStatus(request, response)
-
-  //     for (const [status, properties] of Object.entries(propstats)){
-
-  //         const propstatus = fragment().ele('D:propstat')
-  //         propstatus.ele('D:status').txt(status).up()
-
-  //         const props = propstatus.ele('D:prop')
-  //         for (const property of properties){
-  //             const element = props.ele(property.name);
-  //             if (typeof property.content === "string"){
-  //                 element.txt(property.content)
-  //             } else {
-  //                 element.import(property.content)
-  //             }
-  //         }
-
-  //         builder.import(propstatus)
-  //     }
-  // }
-
-  // async getFragment(request: TRequest, response: TResponse) {
-  //     // console.log(this.path)
-  //     return this.path
-  // }
-
-  // // Could be moved to router.endpoint class
-  // async getAbsoluteUri(request: TRequest, response: TResponse){
-  //     return this.fullURI
-  // }
-
-  // async getVisibleChildren(request: TRequest, response: TResponse){
-  //     return this.children.filter(it => it instanceof WebDAVResourceBase)
-  // }
-
-  // async appendResponse(builder: XMLBuilder, request: TRequest, response: TResponse){
-
-  //     // request.frames.push(this)
-
-  //     const responseElement = fragment().ele('D:response')
-  //     responseElement.ele('D:href').txt(await this.getAbsoluteUri(request, response))
-  //     await this.appendPropertyStatus(responseElement, request, response)
-  //     builder.import(responseElement)
-
-  //     const depth = (request.headers['depth'] as '0' | '1' | 'infinity') ?? '0'
-
-  //     if ( ['1', 'infinity'].includes(depth) ){
-
-  //         if (depth == '1'){ request.headers['depth'] = '0' }
-
-  //         for (const child of await this.getVisibleChildren(request, response)){
-  //             await child.appendResponse(builder, request, response)
-  //         }
-  //     }
-
-  //     // request.frames.pop()
-  // }
 }

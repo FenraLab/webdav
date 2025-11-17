@@ -66,7 +66,7 @@ export class WebDAVResourcePropertyManagerVisitor<
   }
 
   override traverse(endpoint: TEndpoint): Promise<EVisitResult> {
-    this.responses = [];
+    this.responses = this.responses ?? [];
     return super.traverse(endpoint);
   }
 
@@ -76,7 +76,7 @@ export class WebDAVResourcePropertyManagerVisitor<
         (await endpoint.propertyManager?.getPropFindResponses(this.request)) ??
         [];
       this.responses?.push(...responses);
-      console.log(responses);
+      // console.log(responses);
 
       if (this.depth == "infinity") {
         // Maybe disallow this behaviour
@@ -97,13 +97,6 @@ export class WebDAVResourcePropertyManagerVisitor<
   }
 }
 
-export class Property {
-  constructor(
-    public name: string,
-    public content: string | XMLBuilder,
-  ) {}
-}
-
 export class PropertyManager<
   TRequest extends Request = Request,
   TResponse extends Response = Response,
@@ -117,7 +110,7 @@ export class PropertyManager<
   async getPropFindResponses(request: TRequest): Promise<IPropFindResponse[]> {
     return [
       {
-        href: "HREF",
+        href: this.resource.getResolvedUI(request),
         propstat: [
           {
             properties: [
@@ -125,6 +118,21 @@ export class PropertyManager<
                 value: fragment()
                   .ele("D:displayname")
                   .txt(await this.resource.getDisplayName(request)),
+              },
+              {
+                value: fragment()
+                  .ele("D:resourcetype")
+                  .import(await this.resource.getResourceType(request) ?? fragment()),
+              },
+              {
+                value: fragment()
+                  .ele("D:getlastmodified")
+                  .txt("Mon, 10 Feb 2025 12:00:00 GMT"),
+              },
+              {
+                value: fragment()
+                  .ele("D:creationdate")
+                  .txt("2025-02-10T12:00:00Z"),
               },
             ],
             status: "HTTP/1.1 200 OK",
@@ -134,28 +142,4 @@ export class PropertyManager<
     ];
   }
 
-  // async getPropertiesGroupedByStatus(
-  //   request: TRequest,
-  //   response: TResponse,
-  // ): Promise<Record<string, Property[]>> {
-  //   return {
-  //     ["HTTP/1.1 200 OK"]: [
-  //       new Property(
-  //         "D:displayname",
-  //         await this.resource.getDisplayName(request),
-  //       ),
-  //       new Property(
-  //         "D:resourcetype",
-  //         await this.resource.getResourceType(request),
-  //       ),
-  //       new Property(
-  //         "D:getcontentlength",
-  //         (await this.resource.getContentLength(request)).toString(),
-  //       ),
-  //       new Property("D:getlastmodified", "Mon, 01 Nov 2025 17:00:00 GMT"),
-  //       new Property("D:creationdate", "Mon, 01 Nov 2025 17:00:00 GMT"),
-  //       new Property("D:read-only", ""),
-  //     ],
-  //   };
-  // }
 }
